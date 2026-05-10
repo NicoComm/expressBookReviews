@@ -22,7 +22,7 @@ public_users.post("/register", (req,res) => {
 // Get the book list available in the shop
 public_users.get('/', async function (req, res) {
   // const data = JSON.stringify(books); SYNCRONI
- /* try{
+  try{
     const response = await axios.get('http://localhost:5000/');
 
     return res.status(200).json(response.data);
@@ -30,7 +30,7 @@ public_users.get('/', async function (req, res) {
       return res.status(500).json({
             message: "Error fetching books"
         });
-  }  */
+  }
 });
 
 // Get book details based on ISBN
