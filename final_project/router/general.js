@@ -3,6 +3,7 @@ let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
+const axios = require('axios');
 
 
 public_users.post("/register", (req,res) => {
@@ -11,7 +12,7 @@ public_users.post("/register", (req,res) => {
       users.push({username: req.body.username , password: req.body.password});
       return res.status(200).json({message: "User Registered Successfully: " + req.body.username});
     }else{
-      return res.status(400).json({message: "User already exist: " + req.body.username});
+      return res.status(400).json({message: "User already exists: " + req.body.username});
     }
   }else{
     return res.status(400).json({message: "Missing Username / Password"});
@@ -19,8 +20,17 @@ public_users.post("/register", (req,res) => {
 });
 
 // Get the book list available in the shop
-public_users.get('/',function (req, res) {
-  return res.send(JSON.stringify(books));
+public_users.get('/', async function (req, res) {
+  // const data = JSON.stringify(books); SYNCRONI
+ /* try{
+    const response = await axios.get('http://localhost:5000/');
+
+    return res.status(200).json(response.data);
+  }catch (error){
+      return res.status(500).json({
+            message: "Error fetching books"
+        });
+  }  */
 });
 
 // Get book details based on ISBN
@@ -54,12 +64,20 @@ public_users.get('/title/:title',function (req, res) {
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
   const book_isbn = req.params.isbn;
-  const exist_reviews = books[book_isbn].reviews;
-  if(exist_reviews){
-    return res.send(exist_reviews);
-  }else{
-    return res.status(404).json({message: "Reviews not found by ISBN"});
-  } 
+
+    const book = books[book_isbn];
+
+    if (book) {
+
+        return res.status(200).json(book.reviews);
+
+    } else {
+
+        return res.status(404).json({
+            message: "Book not found"
+        });
+
+    }
 });
 
 module.exports.general = public_users;
