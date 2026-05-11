@@ -29,26 +29,40 @@ const authenticatedUser = (username,password)=>{ //returns boolean
   }
 }
 
-//only registered users can login
 regd_users.post("/login", (req,res) => {
+
   if(req.body.username && req.body.password){
+
     if(isValid(req.body.username)){
-      if(authenticatedUser(req.body.username,req.body.password)){
-        
-        const accessToken = jwt.sign({data:req.body.password}, 'access', {expiresIn: 60});
 
-        req.session.authorization = {accessToken, session_username: req.body.username};
-        return res.status(200).send("User successfully logged in");
+      if(authenticatedUser(req.body.username, req.body.password)){
 
-      }else {
-        return res.status(400).json({message: "Invalid Credencials"});  
-      }    
-    }else{
-      return res.status(400).json({message: "Invalid Username"});  
+        const accessToken = jwt.sign({data:req.body.password},'access',{expiresIn: 60});
+
+        req.session.authorization = {accessToken,session_username: req.body.username};
+
+        return res.status(200).json({
+          message: "Login successful"
+        });
+
+      } else {
+        return res.status(400).json({
+          message: "Invalid Credentials"
+        });
+      }
+
+    } else {
+      return res.status(400).json({
+        message: "Invalid Username"
+      });
     }
-  }else {
-    return res.status(400).json({message: "Missing Username / Password"});
+
+  } else {
+    return res.status(400).json({
+      message: "Missing Username / Password"
+    });
   }
+
 });
 
 
@@ -78,7 +92,7 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
       delete book.reviews[user];
 
       return res.status(200).json({
-                message: "Review delete successfully",
+                message: "Review deleted successfully",
       });
     }else{
       return res.status(404).json({message: "Book no found"});

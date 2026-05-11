@@ -21,11 +21,9 @@ public_users.post("/register", (req,res) => {
 
 // Get the book list available in the shop
 public_users.get('/', async function (req, res) {
-  // const data = JSON.stringify(books); SYNCRONI
   try{
-    const response = await axios.get('http://localhost:5000/');
-
-    return res.status(200).json(response.data);
+    //Sin axios por recursion infinita y tambien se envia el objeto books directamente. ya que el.json ya lo comvierte a json no es necesario el JSON.stringify(books)
+    return res.status(200).json(books);
   }catch (error){
       return res.status(500).json({
             message: "Error fetching books"
@@ -35,77 +33,108 @@ public_users.get('/', async function (req, res) {
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', async function (req, res) {
-  const book_isbn = books[req.params.isbn]
-  return res.send(JSON.stringify(book_isbn));
-  try{
-    const response = await axios.get(`http://localhost:5000/isbn/${req.params.isbn}`);
-
-    return res.status(200).json(response.data);
-  }catch (error){
-      return res.status(500).json({
-            message: "Error fetching books"
-        });
-  }
-});
-  
-// Get book details based on author
-public_users.get('/author/:author', async function (req, res) {
   try {
+    const response = await axios.get('http://localhost:5000/');
+    const allBooks = response.data;
+    const book = allBooks[req.params.isbn];
 
-    const author_params = req.params.author;
-
-    const exist_book = Object.values(books).filter(book => book.author === author_params);
-
-    if (exist_book.length > 0) {
-      return res.status(200).json(exist_book);
-    } else {
-      return res.status(404).json({
-        message: "Book not found by Author"
-      });
+    if (book) {
+      return res.status(200).json(book);
     }
 
+    return res.status(404).json({
+      message: "Book not found"
+    });
+
   } catch (error) {
+
     return res.status(500).json({
       message: "Error fetching books"
     });
+
+  }
+});
+
+// Get book details based on author
+public_users.get('/author/:author', async function (req, res) {
+
+  try {
+
+    const response = await axios.get('http://localhost:5000/');
+
+    const allBooks = response.data;
+
+    const filteredBooks = Object.values(allBooks).filter(
+      book => book.author === req.params.author
+    );
+
+    if (filteredBooks.length > 0) {
+      return res.status(200).json(filteredBooks);
+    }
+
+    return res.status(404).json({
+      message: "Book not found by Author"
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      message: "Error fetching books"
+    });
+
   }
 
 });
+
 
 // Get all books based on title
 public_users.get('/title/:title', async function (req, res) {
+
   try {
-  const title_params = req.params.title;
-    const exist_book = Object.values(books).filter(book => book.title === title_params)
-    if(exist_book.length >0){
-      return res.status(200).json(exist_book);
-    }else{
-      return res.status(404).json({message: "Book not found by Title"});
+    const response = await axios.get('http://localhost:5000/');
+    const allBooks = response.data;
+    const filteredBooks = Object.values(allBooks).filter(book => book.title === req.params.title);
+
+    if (filteredBooks.length > 0) {
+      return res.status(200).json(filteredBooks);
     }
 
+    return res.status(404).json({
+      message: "Book not found by Title"
+    });
+
   } catch (error) {
+
     return res.status(500).json({
       message: "Error fetching books"
     });
+
   }
+
 });
 
-//  Get book review
-public_users.get('/review/:isbn',function (req, res) {
-  const book_isbn = req.params.isbn;
-
-    const book = books[book_isbn];
+// Get book review
+public_users.get('/review/:isbn', async function (req, res) {
+  try {
+    const response = await axios.get('http://localhost:5000/');
+    const allBooks = response.data;
+    const book = allBooks[req.params.isbn];
 
     if (book) {
-        return res.status(200).json(book.reviews);
-
-    } else {
-
-        return res.status(404).json({
-            message: "Book not found"
-        });
-
+      return res.status(200).json(book.reviews);
     }
-});
 
+    return res.status(404).json({
+      message: "Book not found"
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      message: "Error fetching books"
+    });
+
+  }
+
+});
 module.exports.general = public_users;
